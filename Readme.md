@@ -137,6 +137,7 @@ The backend models users, research projects, and collaboration requests. Referen
 - `POST /api/collaboration-requests` creates a collaboration request. Required fields: `sender`, `recipient`, and `message`; `project` and `status` are optional.
 - `PUT /api/users/:id` updates a user and returns the public user without the password. Send any valid user fields; passwords are hashed before saving.
 - `PUT /api/projects/:id` updates a research project and returns the populated project. Send valid project fields such as `title`, `description`, `researchAreas`, `status`, or `outcomes`.
+- `DELETE /api/projects/:id` deletes a research project and returns the deleted project ID.
 - `PUT /api/collaboration-requests/:id` updates a collaboration request and returns its populated sender, recipient, and project.
 
 Example workflow after starting MongoDB and the backend:
@@ -148,7 +149,11 @@ Invoke-RestMethod http://localhost:5000/api/projects
 Invoke-RestMethod -Method Post http://localhost:5000/api/collaboration-requests -ContentType 'application/json' -Body (@{sender=$user._id;recipient=$user._id;message='Interested in collaborating on this research.'} | ConvertTo-Json)
 # Update the project using its returned _id.
 Invoke-RestMethod -Method Put http://localhost:5000/api/projects/<project-id> -ContentType 'application/json' -Body (@{status='active';outcomes='Initial findings recorded.'} | ConvertTo-Json)
+# Delete the project using its returned _id.
+Invoke-RestMethod -Method Delete http://localhost:5000/api/projects/<project-id>
 ```
+
+The React project list also supports editing a project's title, description, research areas, and owner through the `PUT` endpoint. The Delete action removes the project through the `DELETE` endpoint after confirmation.
 
 ---
 

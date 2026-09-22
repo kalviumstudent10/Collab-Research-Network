@@ -11,6 +11,7 @@ function Home() {
   const [form, setForm] = useState(initialForm);
   const [userForm, setUserForm] = useState(initialUser);
   const [requestForm, setRequestForm] = useState(initialRequest);
+  const [editingProjectId, setEditingProjectId] = useState(null);
   const [message, setMessage] = useState("");
 
   async function loadProjects() {
@@ -86,6 +87,60 @@ function Home() {
     setMessage("Project saved to MongoDB.");
   }
 
+  function editProject(project) {
+    setEditingProjectId(project._id);
+    setForm({
+      title: project.title,
+      description: project.description,
+      researchAreas: project.researchAreas.join(", "),
+      owner: project.owner?._id || project.owner,
+    });
+    setMessage("Editing project. Save the form to update it.");
+  }
+
+  function cancelProjectEdit() {
+    setEditingProjectId(null);
+    setForm(initialForm);
+    setMessage("");
+  }
+
+  async function updateProject(event) {
+    event.preventDefault();
+    setMessage("");
+    const response = await fetch(`${API_URL}/api/projects/${editingProjectId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...form,
+        researchAreas: form.researchAreas.split(",").map((area) => area.trim()).filter(Boolean),
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      setMessage(result.error || result.message || "Could not update project.");
+      return;
+    }
+    setProjects(projects.map((project) => (project._id === result._id ? result : project)));
+    setEditingProjectId(null);
+    setForm(initialForm);
+    setMessage("Project updated with PUT.");
+  }
+
+  async function deleteProject(projectId) {
+    if (!window.confirm("Delete this research project?")) return;
+
+    setMessage("");
+    const response = await fetch(`${API_URL}/api/projects/${projectId}`, { method: "DELETE" });
+    const result = await response.json();
+    if (!response.ok) {
+      setMessage(result.error || result.message || "Could not delete project.");
+      return;
+    }
+    setProjects(projects.filter((project) => project._id !== projectId));
+    if (editingProjectId === projectId) cancelProjectEdit();
+    setMessage("Project deleted.");
+  }
+
   async function createCollaborationRequest(event) {
     event.preventDefault();
     setMessage("");
@@ -136,8 +191,8 @@ function Home() {
             <input name="department" value={userForm.department} onChange={updateUserForm} placeholder="Department" />
             <button type="submit">Save researcher</button>
           </form>
-          <form onSubmit={createProject}>
-          <h2>Publish a project</h2>
+          <form onSubmit={editingProjectId ? updateProject : createProject}>
+          <h2>{editingProjectId ? "Edit project" : "Publish a project"}</h2>
           <input name="title" value={form.title} onChange={updateForm} placeholder="Project title" required />
           <textarea name="description" value={form.description} onChange={updateForm} placeholder="What are you researching?" required />
           <input name="researchAreas" value={form.researchAreas} onChange={updateForm} placeholder="Research areas, comma separated" required />
@@ -145,7 +200,8 @@ function Home() {
             <option value="">Select project owner</option>
             {users.map((user) => <option key={user._id} value={user._id}>{user.name} ({user.email})</option>)}
           </select>
-          <button type="submit">Save project</button>
+          <button type="submit">{editingProjectId ? "Update project" : "Save project"}</button>
+          {editingProjectId && <button type="button" onClick={cancelProjectEdit}>Cancel</button>}
           {message && <small>{message}</small>}
           </form>
           <form onSubmit={createCollaborationRequest}>
@@ -176,6 +232,10 @@ function Home() {
                 <option value="completed">Completed</option>
                 <option value="archived">Archived</option>
               </select>
+              <div>
+                <button type="button" onClick={() => editProject(project)}>Edit</button>
+                <button type="button" onClick={() => deleteProject(project._id)}>Delete</button>
+              </div>
               <h3>{project.title}</h3>
               <p>{project.description}</p>
               <small>{project.researchAreas.join(" / ")} · {project.owner?.name || "Unknown owner"}</small>

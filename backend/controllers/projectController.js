@@ -48,4 +48,19 @@ async function updateProject(req, res) {
   }
 }
 
-module.exports = { getProjects, createProject, updateProject };
+async function deleteProject(req, res) {
+  try {
+    const project = await ResearchProject.findByIdAndDelete(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({ message: "Research project not found" });
+    }
+
+    res.status(200).json({ message: "Research project deleted", id: project._id });
+  } catch (error) {
+    const statusCode = error.name === "CastError" ? 400 : 500;
+    res.status(statusCode).json({ message: "Unable to delete research project", error: error.message });
+  }
+}
+
+module.exports = { getProjects, createProject, updateProject, deleteProject };
