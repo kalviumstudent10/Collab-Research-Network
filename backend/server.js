@@ -5,17 +5,11 @@ const connectDatabase = require("./config/database");
 const User = require("./models/User");
 const ResearchProject = require("./models/ResearchProject");
 const CollaborationRequest = require("./models/CollaborationRequest");
-const projectRoutes = require("./routes/projectRoutes");
-const userRoutes = require("./routes/userRoutes");
-const collaborationRequestRoutes = require("./routes/collaborationRequestRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use("/api/projects", projectRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/collaboration-requests", collaborationRequestRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({

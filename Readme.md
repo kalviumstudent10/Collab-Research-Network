@@ -118,42 +118,10 @@ By making institutional research more visible and accessible, the platform promo
 ## Backend setup
 
 1. Install dependencies in `backend` with `npm install`.
-2. Copy `backend/.env.example` to `backend/.env` and set `MONGO_URI` to a MongoDB Atlas connection string.
+2. Create `backend/.env` and set `MONGO_URI` to a MongoDB Atlas connection string.
 3. Start the API with `npm start` or `npm run dev`.
 
-Start the frontend in a second terminal with `cd frontend`, `npm install`, and `npm run dev`. The page first reads existing users and projects. Use **Add a researcher** to write a user, then select that researcher in **Publish a project** to write a project. The project list is then refreshed from the API on the next page load.
-
-For a quick API demonstration, create a user, use its returned `_id` as the project `owner`, and then call `GET /api/users` and `GET /api/projects` to show both persisted records. Passwords are hashed before users are saved and are never returned by the API.
-
 The backend models users, research projects, and collaboration requests. References connect project owners and collaborators, while each collaboration request stores its sender, recipient, optional project, message, and status.
-
-### Database read/write API
-
-- `GET /api/users` reads users for selecting a project owner.
-- `POST /api/users` writes a user. Required fields: `name`, `email`, and `password`.
-- `GET /api/projects` reads projects, with optional `status` and `researchArea` filters.
-- `POST /api/projects` writes a project. Required fields: `title`, `description`, `owner` (a User `_id`), and a non-empty `researchAreas` array.
-- `GET /api/collaboration-requests` reads collaboration requests with populated sender, recipient, and project details. It supports optional `status`, `sender`, `recipient`, and `project` filters.
-- `POST /api/collaboration-requests` creates a collaboration request. Required fields: `sender`, `recipient`, and `message`; `project` and `status` are optional.
-- `PUT /api/users/:id` updates a user and returns the public user without the password. Send any valid user fields; passwords are hashed before saving.
-- `PUT /api/projects/:id` updates a research project and returns the populated project. Send valid project fields such as `title`, `description`, `researchAreas`, `status`, or `outcomes`.
-- `DELETE /api/projects/:id` deletes a research project and returns the deleted project ID.
-- `PUT /api/collaboration-requests/:id` updates a collaboration request and returns its populated sender, recipient, and project.
-
-Example workflow after starting MongoDB and the backend:
-
-```powershell
-$user = Invoke-RestMethod -Method Post http://localhost:5000/api/users -ContentType 'application/json' -Body '{"name":"Asha Researcher","email":"asha@example.com","password":"secret123"}'
-Invoke-RestMethod -Method Post http://localhost:5000/api/projects -ContentType 'application/json' -Body (@{title='Climate Signals';description='Studying local climate patterns.';owner=$user._id;researchAreas=@('Climate','Data Science')} | ConvertTo-Json)
-Invoke-RestMethod http://localhost:5000/api/projects
-Invoke-RestMethod -Method Post http://localhost:5000/api/collaboration-requests -ContentType 'application/json' -Body (@{sender=$user._id;recipient=$user._id;message='Interested in collaborating on this research.'} | ConvertTo-Json)
-# Update the project using its returned _id.
-Invoke-RestMethod -Method Put http://localhost:5000/api/projects/<project-id> -ContentType 'application/json' -Body (@{status='active';outcomes='Initial findings recorded.'} | ConvertTo-Json)
-# Delete the project using its returned _id.
-Invoke-RestMethod -Method Delete http://localhost:5000/api/projects/<project-id>
-```
-
-The React project list also supports editing a project's title, description, research areas, and owner through the `PUT` endpoint. The Delete action removes the project through the `DELETE` endpoint after confirmation.
 
 ---
 
