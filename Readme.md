@@ -118,8 +118,12 @@ By making institutional research more visible and accessible, the platform promo
 ## Backend setup
 
 1. Install dependencies in `backend` with `npm install`.
-2. Create `backend/.env` and set `MONGO_URI` to a MongoDB Atlas connection string.
+2. Copy `backend/.env.example` to `backend/.env` and set `MONGO_URI` to a MongoDB Atlas connection string.
 3. Start the API with `npm start` or `npm run dev`.
+
+Start the frontend in a second terminal with `cd frontend`, `npm install`, and `npm run dev`. The page first reads existing users and projects. Use **Add a researcher** to write a user, then select that researcher in **Publish a project** to write a project. The project list is then refreshed from the API on the next page load.
+
+For a quick API demonstration, create a user, use its returned `_id` as the project `owner`, and then call `GET /api/users` and `GET /api/projects` to show both persisted records. Passwords are hashed before users are saved and are never returned by the API.
 
 The backend models users, research projects, and collaboration requests. References connect project owners and collaborators, while each collaboration request stores its sender, recipient, optional project, message, and status.
 
