@@ -123,6 +123,21 @@ By making institutional research more visible and accessible, the platform promo
 
 The backend models users, research projects, and collaboration requests. References connect project owners and collaborators, while each collaboration request stores its sender, recipient, optional project, message, and status.
 
+### Database read/write API
+
+- `GET /api/users` reads users for selecting a project owner.
+- `POST /api/users` writes a user. Required fields: `name`, `email`, and `password`.
+- `GET /api/projects` reads projects, with optional `status` and `researchArea` filters.
+- `POST /api/projects` writes a project. Required fields: `title`, `description`, `owner` (a User `_id`), and a non-empty `researchAreas` array.
+
+Example workflow after starting MongoDB and the backend:
+
+```powershell
+$user = Invoke-RestMethod -Method Post http://localhost:5000/api/users -ContentType 'application/json' -Body '{"name":"Asha Researcher","email":"asha@example.com","password":"secret123"}'
+Invoke-RestMethod -Method Post http://localhost:5000/api/projects -ContentType 'application/json' -Body (@{title='Climate Signals';description='Studying local climate patterns.';owner=$user._id;researchAreas=@('Climate','Data Science')} | ConvertTo-Json)
+Invoke-RestMethod http://localhost:5000/api/projects
+```
+
 ---
 
 ## System Workflow
