@@ -2,6 +2,10 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 async function requireAuth(req, res, next) {
+  if (!process.env.JWT_SECRET) {
+    return res.status(500).json({ message: "JWT_SECRET is not configured" });
+  }
+
   const authorization = req.headers.authorization;
   const token = authorization && authorization.startsWith("Bearer ")
     ? authorization.slice(7)

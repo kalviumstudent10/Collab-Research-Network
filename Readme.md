@@ -1,3 +1,14 @@
+## JWT authentication
+
+Set `MONGO_URI` and `JWT_SECRET` in the backend environment before starting the API.
+
+`POST /api/auth/register` and `POST /api/auth/login` return a JWT. Send it on protected requests with:
+
+```text
+Authorization: Bearer <token>
+```
+
+The `/api/auth/me`, `/api/users`, `/api/projects`, and `/api/collaboration-requests` endpoints require a valid, non-expired token. Project creation uses the authenticated user as its owner, and project changes are limited to that owner. Collaboration requests use the authenticated user as sender, and updates are limited to their sender or recipient.
 # Research Networking Platform
 
 ## Overview
