@@ -115,6 +115,14 @@ By making institutional research more visible and accessible, the platform promo
 - Git & GitHub
 - REST APIs
 
+## Backend setup
+
+1. Install dependencies in `backend` with `npm install`.
+2. Create `backend/.env` and set `MONGO_URI` to a MongoDB Atlas connection string.
+3. Start the API with `npm start` or `npm run dev`.
+
+The backend models users, research projects, and collaboration requests. References connect project owners and collaborators, while each collaboration request stores its sender, recipient, optional project, message, and status.
+
 ---
 
 ## System Workflow
