@@ -118,8 +118,18 @@ By making institutional research more visible and accessible, the platform promo
 ## Backend setup
 
 1. Install dependencies in `backend` with `npm install`.
-2. Create `backend/.env` and set `MONGO_URI` to a MongoDB Atlas connection string.
+2. Copy `backend/.env.example` to `backend/.env` and set `MONGO_URI` and a private `JWT_SECRET`.
 3. Start the API with `npm start` or `npm run dev`.
+
+### Username and password authentication
+
+The API exposes:
+
+- `POST /api/auth/register` with `username`, `name`, `email`, and `password`.
+- `POST /api/auth/login` with `username` and `password`.
+- `GET /api/auth/me` with an `Authorization: Bearer <token>` header.
+
+Passwords are hashed with bcrypt before storage. Successful registration and login return a one-day JWT and a public user profile; the password is never returned.
 
 The backend models users, research projects, and collaboration requests. References connect project owners and collaborators, while each collaboration request stores its sender, recipient, optional project, message, and status.
 
