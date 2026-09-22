@@ -1,0 +1,27 @@
+const CollaborationRequest = require("../models/CollaborationRequest");
+
+async function getCollaborationRequests(req, res) {
+  try {
+    const filter = {};
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.recipient) filter.recipient = req.query.recipient;
+    if (req.query.sender) filter.sender = req.query.sender;
+    if (req.query.project) filter.project = req.query.project;
+
+    const requests = await CollaborationRequest.find(filter)
+      .populate("sender", "name email department")
+      .populate("recipient", "name email department")
+      .populate("project", "title status")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(requests);
+  } catch (error) {
+    const statusCode = error.name === "CastError" ? 400 : 500;
+    res.status(statusCode).json({
+      message: "Unable to fetch collaboration requests",
+      error: error.message,
+    });
+  }
+}
+
+module.exports = { getCollaborationRequests };
