@@ -131,6 +131,12 @@ The API exposes:
 
 Passwords are hashed with bcrypt before storage. Successful registration and login return a one-day JWT and a public user profile; the password is never returned.
 
+To verify JWT authorization manually:
+
+1. Register or sign in and copy the `token` from the response.
+2. Request `GET /api/auth/me` with `Authorization: Bearer <token>`; a valid token returns the authenticated user.
+3. Repeat the request without the header, or with an invalid/expired token; the API returns `401 Unauthorized`.
+
 The backend models users, research projects, and collaboration requests. References connect project owners and collaborators, while each collaboration request stores its sender, recipient, optional project, message, and status.
 
 ---
