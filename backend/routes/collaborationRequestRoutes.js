@@ -1,7 +1,10 @@
 const express = require("express");
-const { getCollaborationRequests } = require("../controllers/collaborationRequestController");
+const {
+	createCollaborationRequest,
+	getCollaborationRequests,
+} = require("../controllers/collaborationRequestController");
 
 const router = express.Router();
-router.route("/").get(getCollaborationRequests);
+router.route("/").get(getCollaborationRequests).post(createCollaborationRequest);
 
 module.exports = router;

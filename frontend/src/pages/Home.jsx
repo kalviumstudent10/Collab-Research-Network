@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const initialForm = { title: "", description: "", researchAreas: "", owner: "" };
 const initialUser = { name: "", email: "", password: "", department: "" };
+const initialRequest = { sender: "", recipient: "", project: "", message: "" };
 
 function Home() {
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [userForm, setUserForm] = useState(initialUser);
+  const [requestForm, setRequestForm] = useState(initialRequest);
   const [message, setMessage] = useState("");
 
   async function loadProjects() {
@@ -38,6 +40,10 @@ function Home() {
 
   function updateUserForm(event) {
     setUserForm({ ...userForm, [event.target.name]: event.target.value });
+  }
+
+  function updateRequestForm(event) {
+    setRequestForm({ ...requestForm, [event.target.name]: event.target.value });
   }
 
   async function createUser(event) {
@@ -80,6 +86,23 @@ function Home() {
     setMessage("Project saved to MongoDB.");
   }
 
+  async function createCollaborationRequest(event) {
+    event.preventDefault();
+    setMessage("");
+    const response = await fetch(`${API_URL}/api/collaboration-requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestForm),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      setMessage(result.error || result.message || "Could not send collaboration request.");
+      return;
+    }
+    setRequestForm(initialRequest);
+    setMessage("Collaboration request sent to MongoDB.");
+  }
+
   return (
     <main>
       <header>
@@ -108,6 +131,23 @@ function Home() {
           </select>
           <button type="submit">Save project</button>
           {message && <small>{message}</small>}
+          </form>
+          <form onSubmit={createCollaborationRequest}>
+            <h2>Request collaboration</h2>
+            <select name="sender" value={requestForm.sender} onChange={updateRequestForm} required>
+              <option value="">Select sender</option>
+              {users.map((user) => <option key={user._id} value={user._id}>{user.name}</option>)}
+            </select>
+            <select name="recipient" value={requestForm.recipient} onChange={updateRequestForm} required>
+              <option value="">Select recipient</option>
+              {users.map((user) => <option key={user._id} value={user._id}>{user.name}</option>)}
+            </select>
+            <select name="project" value={requestForm.project} onChange={updateRequestForm}>
+              <option value="">No specific project</option>
+              {projects.map((project) => <option key={project._id} value={project._id}>{project.title}</option>)}
+            </select>
+            <textarea name="message" value={requestForm.message} onChange={updateRequestForm} placeholder="Why should you collaborate?" maxLength="1000" required />
+            <button type="submit">Send request</button>
           </form>
         </div>
         <section className="projects">
