@@ -43,4 +43,25 @@ async function getCollaborationRequests(req, res) {
   }
 }
 
-module.exports = { createCollaborationRequest, getCollaborationRequests };
+async function updateCollaborationRequest(req, res) {
+  try {
+    const request = await CollaborationRequest.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    })
+      .populate("sender", "name email department")
+      .populate("recipient", "name email department")
+      .populate("project", "title status");
+
+    if (!request) {
+      return res.status(404).json({ message: "Collaboration request not found" });
+    }
+
+    res.status(200).json(request);
+  } catch (error) {
+    const statusCode = error.name === "ValidationError" || error.name === "CastError" ? 400 : 500;
+    res.status(statusCode).json({ message: "Unable to update collaboration request", error: error.message });
+  }
+}
+
+module.exports = { createCollaborationRequest, getCollaborationRequests, updateCollaborationRequest };
