@@ -19,7 +19,7 @@ async function getProjects(req, res) {
 
 async function createProject(req, res) {
   try {
-    const project = await ResearchProject.create(req.body);
+    const project = await ResearchProject.create({ ...req.body, owner: req.user._id });
     const savedProject = await project.populate("owner", "name email department");
     res.status(201).json(savedProject);
   } catch (error) {
@@ -30,7 +30,12 @@ async function createProject(req, res) {
 
 async function updateProject(req, res) {
   try {
-    const project = await ResearchProject.findByIdAndUpdate(req.params.id, req.body, {
+    const existingProject = await ResearchProject.findOne({ _id: req.params.id, owner: req.user._id });
+    if (!existingProject) {
+      return res.status(404).json({ message: "Research project not found" });
+    }
+
+    const project = await ResearchProject.findByIdAndUpdate(req.params.id, { ...req.body, owner: req.user._id }, {
       new: true,
       runValidators: true,
     })
@@ -50,7 +55,7 @@ async function updateProject(req, res) {
 
 async function deleteProject(req, res) {
   try {
-    const project = await ResearchProject.findByIdAndDelete(req.params.id);
+    const project = await ResearchProject.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
 
     if (!project) {
       return res.status(404).json({ message: "Research project not found" });

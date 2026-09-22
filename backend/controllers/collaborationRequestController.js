@@ -2,7 +2,7 @@ const CollaborationRequest = require("../models/CollaborationRequest");
 
 async function createCollaborationRequest(req, res) {
   try {
-    const request = await CollaborationRequest.create(req.body);
+    const request = await CollaborationRequest.create({ ...req.body, sender: req.user._id });
     const savedRequest = await request.populate([
       { path: "sender", select: "name email department" },
       { path: "recipient", select: "name email department" },
@@ -45,7 +45,18 @@ async function getCollaborationRequests(req, res) {
 
 async function updateCollaborationRequest(req, res) {
   try {
-    const request = await CollaborationRequest.findByIdAndUpdate(req.params.id, req.body, {
+    const existingRequest = await CollaborationRequest.findOne({
+      _id: req.params.id,
+      $or: [{ sender: req.user._id }, { recipient: req.user._id }],
+    });
+    if (!existingRequest) {
+      return res.status(404).json({ message: "Collaboration request not found" });
+    }
+
+    const updates = { ...req.body };
+    delete updates.sender;
+    delete updates.recipient;
+    const request = await CollaborationRequest.findByIdAndUpdate(req.params.id, updates, {
       new: true,
       runValidators: true,
     })
