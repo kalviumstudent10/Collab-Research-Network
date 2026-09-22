@@ -1,5 +1,24 @@
 const CollaborationRequest = require("../models/CollaborationRequest");
 
+async function createCollaborationRequest(req, res) {
+  try {
+    const request = await CollaborationRequest.create(req.body);
+    const savedRequest = await request.populate([
+      { path: "sender", select: "name email department" },
+      { path: "recipient", select: "name email department" },
+      { path: "project", select: "title status" },
+    ]);
+
+    res.status(201).json(savedRequest);
+  } catch (error) {
+    const statusCode = error.name === "ValidationError" || error.name === "CastError" ? 400 : 500;
+    res.status(statusCode).json({
+      message: "Unable to create collaboration request",
+      error: error.message,
+    });
+  }
+}
+
 async function getCollaborationRequests(req, res) {
   try {
     const filter = {};
@@ -24,4 +43,4 @@ async function getCollaborationRequests(req, res) {
   }
 }
 
-module.exports = { getCollaborationRequests };
+module.exports = { createCollaborationRequest, getCollaborationRequests };

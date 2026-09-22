@@ -134,6 +134,7 @@ The backend models users, research projects, and collaboration requests. Referen
 - `GET /api/projects` reads projects, with optional `status` and `researchArea` filters.
 - `POST /api/projects` writes a project. Required fields: `title`, `description`, `owner` (a User `_id`), and a non-empty `researchAreas` array.
 - `GET /api/collaboration-requests` reads collaboration requests with populated sender, recipient, and project details. It supports optional `status`, `sender`, `recipient`, and `project` filters.
+- `POST /api/collaboration-requests` creates a collaboration request. Required fields: `sender`, `recipient`, and `message`; `project` and `status` are optional.
 
 Example workflow after starting MongoDB and the backend:
 
@@ -141,6 +142,7 @@ Example workflow after starting MongoDB and the backend:
 $user = Invoke-RestMethod -Method Post http://localhost:5000/api/users -ContentType 'application/json' -Body '{"name":"Asha Researcher","email":"asha@example.com","password":"secret123"}'
 Invoke-RestMethod -Method Post http://localhost:5000/api/projects -ContentType 'application/json' -Body (@{title='Climate Signals';description='Studying local climate patterns.';owner=$user._id;researchAreas=@('Climate','Data Science')} | ConvertTo-Json)
 Invoke-RestMethod http://localhost:5000/api/projects
+Invoke-RestMethod -Method Post http://localhost:5000/api/collaboration-requests -ContentType 'application/json' -Body (@{sender=$user._id;recipient=$user._id;message='Interested in collaborating on this research.'} | ConvertTo-Json)
 ```
 
 ---
