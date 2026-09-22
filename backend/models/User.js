@@ -5,17 +5,24 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 100,
     },
 
     email: {
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
+      trim: true,
+      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
 
     password: {
       type: String,
       required: true,
+      minlength: 6,
     },
 
     role: {
@@ -26,19 +33,28 @@ const userSchema = new mongoose.Schema(
 
     department: {
       type: String,
+      trim: true,
     },
 
     institution: {
       type: String,
+      trim: true,
     },
 
     bio: {
       type: String,
+      maxlength: 1000,
     },
 
-    researchInterests: [String],
+    researchInterests: {
+      type: [String],
+      default: [],
+    },
 
-    skills: [String],
+    skills: {
+      type: [String],
+      default: [],
+    },
 
     profilePicture: {
       type: String,
