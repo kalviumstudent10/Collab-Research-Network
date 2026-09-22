@@ -133,6 +133,8 @@ The backend models users, research projects, and collaboration requests. Referen
 - `POST /api/users` writes a user. Required fields: `name`, `email`, and `password`.
 - `GET /api/projects` reads projects, with optional `status` and `researchArea` filters.
 - `POST /api/projects` writes a project. Required fields: `title`, `description`, `owner` (a User `_id`), and a non-empty `researchAreas` array.
+- `GET /api/collaboration-requests` reads collaboration requests with populated sender, recipient, and project details. It supports optional `status`, `sender`, `recipient`, and `project` filters.
+- `GET /api/collaboration-requests` reads collaboration requests with populated sender, recipient, and project details. It supports optional `status`, `sender`, `recipient`, and `project` filters.
 
 Example workflow after starting MongoDB and the backend:
 
