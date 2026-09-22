@@ -135,6 +135,9 @@ The backend models users, research projects, and collaboration requests. Referen
 - `POST /api/projects` writes a project. Required fields: `title`, `description`, `owner` (a User `_id`), and a non-empty `researchAreas` array.
 - `GET /api/collaboration-requests` reads collaboration requests with populated sender, recipient, and project details. It supports optional `status`, `sender`, `recipient`, and `project` filters.
 - `POST /api/collaboration-requests` creates a collaboration request. Required fields: `sender`, `recipient`, and `message`; `project` and `status` are optional.
+- `PUT /api/users/:id` updates a user and returns the public user without the password. Send any valid user fields; passwords are hashed before saving.
+- `PUT /api/projects/:id` updates a research project and returns the populated project. Send valid project fields such as `title`, `description`, `researchAreas`, `status`, or `outcomes`.
+- `PUT /api/collaboration-requests/:id` updates a collaboration request and returns its populated sender, recipient, and project.
 
 Example workflow after starting MongoDB and the backend:
 
@@ -143,6 +146,8 @@ $user = Invoke-RestMethod -Method Post http://localhost:5000/api/users -ContentT
 Invoke-RestMethod -Method Post http://localhost:5000/api/projects -ContentType 'application/json' -Body (@{title='Climate Signals';description='Studying local climate patterns.';owner=$user._id;researchAreas=@('Climate','Data Science')} | ConvertTo-Json)
 Invoke-RestMethod http://localhost:5000/api/projects
 Invoke-RestMethod -Method Post http://localhost:5000/api/collaboration-requests -ContentType 'application/json' -Body (@{sender=$user._id;recipient=$user._id;message='Interested in collaborating on this research.'} | ConvertTo-Json)
+# Update the project using its returned _id.
+Invoke-RestMethod -Method Put http://localhost:5000/api/projects/<project-id> -ContentType 'application/json' -Body (@{status='active';outcomes='Initial findings recorded.'} | ConvertTo-Json)
 ```
 
 ---

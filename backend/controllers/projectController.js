@@ -28,4 +28,24 @@ async function createProject(req, res) {
   }
 }
 
-module.exports = { getProjects, createProject };
+async function updateProject(req, res) {
+  try {
+    const project = await ResearchProject.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    })
+      .populate("owner", "name email department")
+      .populate("collaborators", "name email");
+
+    if (!project) {
+      return res.status(404).json({ message: "Research project not found" });
+    }
+
+    res.status(200).json(project);
+  } catch (error) {
+    const statusCode = error.name === "ValidationError" || error.name === "CastError" ? 400 : 500;
+    res.status(statusCode).json({ message: "Unable to update research project", error: error.message });
+  }
+}
+
+module.exports = { getProjects, createProject, updateProject };

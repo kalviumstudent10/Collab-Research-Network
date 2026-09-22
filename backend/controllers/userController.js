@@ -21,4 +21,22 @@ async function getUsers(req, res) {
   }
 }
 
-module.exports = { createUser, getUsers };
+async function updateUser(req, res) {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    Object.assign(user, req.body);
+    await user.save();
+    const publicUser = user.toObject();
+    delete publicUser.password;
+    res.status(200).json(publicUser);
+  } catch (error) {
+    const statusCode = error.name === "ValidationError" || error.name === "CastError" || error.code === 11000 ? 400 : 500;
+    res.status(statusCode).json({ message: "Unable to update user", error: error.message });
+  }
+}
+
+module.exports = { createUser, getUsers, updateUser };

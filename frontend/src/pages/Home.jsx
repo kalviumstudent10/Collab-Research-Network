@@ -103,6 +103,22 @@ function Home() {
     setMessage("Collaboration request sent to MongoDB.");
   }
 
+  async function updateProjectStatus(projectId, status) {
+    setMessage("");
+    const response = await fetch(`${API_URL}/api/projects/${projectId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      setMessage(result.error || result.message || "Could not update project.");
+      return;
+    }
+    setProjects(projects.map((project) => (project._id === result._id ? result : project)));
+    setMessage("Project status updated with PUT.");
+  }
+
   return (
     <main>
       <header>
@@ -154,7 +170,12 @@ function Home() {
           <div className="section-heading"><h2>Research projects</h2><span>{projects.length} found</span></div>
           {projects.length === 0 ? <p>No projects yet. Create the first one.</p> : projects.map((project) => (
             <article key={project._id}>
-              <span>{project.status}</span>
+              <select value={project.status} onChange={(event) => updateProjectStatus(project._id, event.target.value)} aria-label={`Update status for ${project.title}`}>
+                <option value="planning">Planning</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="archived">Archived</option>
+              </select>
               <h3>{project.title}</h3>
               <p>{project.description}</p>
               <small>{project.researchAreas.join(" / ")} · {project.owner?.name || "Unknown owner"}</small>
