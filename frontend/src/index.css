@@ -94,6 +94,10 @@ form { display: grid; gap: 16px; margin-top: 28px; }
 label { display: grid; gap: 7px; color: var(--text-h); font-size: 14px; font-weight: 700; }
 input { box-sizing: border-box; width: 100%; padding: 13px 14px; border: 1px solid var(--border); background: rgba(255,255,255,.65); color: var(--text-h); font: inherit; }
 form button { margin-top: 8px; padding: 14px; border: 0; background: var(--accent); color: white; cursor: pointer; font: inherit; font-weight: 700; }
+.auth-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0 16px; color: var(--text); font-size: 13px; }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.auth-divider span { flex: 0 0 auto; }
+.google-button { display: flex; justify-content: center; min-height: 40px; }
 .switch-button { margin-top: 22px; padding: 0; font-size: 14px; }
 .form-message { margin-top: 18px; color: var(--accent); font-size: 14px; }
 .home-page { padding: 84px 0; }

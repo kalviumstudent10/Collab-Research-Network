@@ -150,6 +150,17 @@ To verify JWT authorization manually:
 
 The backend models users, research projects, and collaboration requests. References connect project owners and collaborators, while each collaboration request stores its sender, recipient, optional project, message, and status.
 
+### Google authentication
+
+Google sign-in uses Google Identity Services in the frontend and verifies the returned ID token on the backend before issuing the platform JWT. To enable it:
+
+1. Create a Web OAuth client in Google Cloud Console and add the local frontend origin (for example, `http://localhost:5173`) to its authorized JavaScript origins.
+2. Add `GOOGLE_CLIENT_ID=...` to `backend/.env`.
+3. Add `VITE_GOOGLE_CLIENT_ID=...` to `frontend/.env`.
+4. Start the backend and frontend, then use the Google button on the sign-in screen.
+
+Existing local accounts are linked automatically when their verified Google email matches. New Google users receive a generated username and can use the rest of the platform immediately.
+
 ---
 
 ## System Workflow

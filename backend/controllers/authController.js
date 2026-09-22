@@ -1,6 +1,10 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
+
+const googleClient = new OAuth2Client();
 
 function createToken(user) {
   if (!process.env.JWT_SECRET) {
@@ -79,8 +83,68 @@ async function login(req, res) {
   }
 }
 
+function usernameFromEmail(email) {
+  return email.split("@")[0].replace(/[^a-z0-9_]/g, "").slice(0, 24) || "researcher";
+}
+
+async function uniqueUsername(email) {
+  const baseUsername = usernameFromEmail(email);
+  let username = baseUsername;
+  let suffix = 1;
+
+  while (await User.exists({ username })) {
+    username = `${baseUsername.slice(0, 30 - String(suffix).length - 1)}_${suffix}`;
+    suffix += 1;
+  }
+
+  return username;
+}
+
+async function googleLogin(req, res) {
+  try {
+    const { credential } = req.body;
+
+    if (!credential || !process.env.GOOGLE_CLIENT_ID) {
+      return res.status(400).json({ message: "Google authentication is not configured" });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+
+    if (!payload?.sub || !payload.email || !payload.email_verified) {
+      return res.status(401).json({ message: "Google account could not be verified" });
+    }
+
+    const email = payload.email.toLowerCase();
+    let user = await User.findOne({ $or: [{ googleId: payload.sub }, { email }] });
+
+    if (!user) {
+      user = await User.create({
+        googleId: payload.sub,
+        username: await uniqueUsername(email),
+        name: payload.name || email.split("@")[0],
+        email,
+        password: crypto.randomBytes(32).toString("hex"),
+        profilePicture: payload.picture,
+      });
+    } else if (!user.googleId) {
+      user.googleId = payload.sub;
+      if (payload.picture && !user.profilePicture) user.profilePicture = payload.picture;
+      await user.save();
+    }
+
+    return res.status(200).json({ token: createToken(user), user: publicUser(user) });
+  } catch (error) {
+    console.error("Google authentication failed:", error.message);
+    return res.status(401).json({ message: "Unable to sign in with Google" });
+  }
+}
+
 async function getCurrentUser(req, res) {
   return res.status(200).json({ user: publicUser(req.user) });
 }
 
-module.exports = { register, login, getCurrentUser };
+module.exports = { register, login, googleLogin, getCurrentUser };
